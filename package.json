@@ -7,7 +7,12 @@
     "start": "node index.js",
     "client:js": "node clients/js/client.js",
     "client:ruby": "ruby clients/ruby/client.rb",
-    "compile:ruby": "grpc_tools_ruby_protoc -I ./protos --ruby_out=clients/ruby/lib --grpc_out=clients/ruby/lib ./protos/virtru.proto" 
+    "compile:ruby": "grpc_tools_ruby_protoc -I ./protos --ruby_out=clients/ruby/lib --grpc_out=clients/ruby/lib ./protos/virtru.proto",
+    "client:go": "cd clients/go && go run virtru.pb.go virtru_grpc.pb.go client.go && cd -",
+    "clean:go": "rm -rf clients/go/protos clients/go/virtru_grpc.pb.go clients/go/virtru.pb.go",
+    "build:go": "protoc --go_out=clients/go  --go-grpc_out=clients/go ./protos/virtru.proto",
+    "post-build:go": "mv clients/go/protos/* clients/go/ && rm -rf clients/go/protos",
+    "compile:go": "npm run clean:go && npm run build:go && npm run post-build:go"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.2.2",
