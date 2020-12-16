@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-const	address = "localhost:50051"
+const	address = "0.0.0.0:50051"
 
 func main() {
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
@@ -18,12 +18,23 @@ func main() {
 	defer conn.Close()
 	c := NewVirtruClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
-	r, err := c.Encrypt(ctx, &EncryptRequest{UnprotectedString: "Hello World"})
+	encResp, err := c.Encrypt(ctx, &EncryptRequest{UnprotectedString: "Hello World"})
 	if err != nil {
-		log.Fatalf("Could not protect: %v", err)
+		log.Fatalf("Could not protect string: %v", err)
 	}
-	log.Printf("Protected string: %s", r.GetProtectedString())
+
+	log.Printf("Protected string: %s", encResp.GetProtectedString())
+
+	ctx, cancel = context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	decResp, err := c.Decrypt(ctx, &DecryptRequest{ProtectedString: encResp.GetProtectedString()})
+	if err != nil {
+		log.Fatalf("Could not decrypt protected string: %v", err)
+	}
+
+	log.Printf("Decrypted protected string: %s", decResp.GetUnprotectedString())
 }
