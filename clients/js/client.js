@@ -1,31 +1,32 @@
-var PROTO_PATH = __dirname + '/../../protos/virtru.proto'
+const PROTO_PATH = __dirname + '/../../protos/virtru.proto'
 
-var grpc = require('@grpc/grpc-js')
-var protoLoader = require('@grpc/proto-loader')
-var packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+const grpc = require('@grpc/grpc-js')
+const protoLoader = require('@grpc/proto-loader')
+const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   keepCase: true,
   longs: String,
   enums: String,
   defaults: true,
   oneofs: true,
 })
-var virtruProto = grpc.loadPackageDefinition(packageDefinition).virtru
+const virtruProto = grpc.loadPackageDefinition(packageDefinition).virtru
 
-function main() {
-  var target = 'localhost:50051'
-  var client = new virtruProto.Virtru(
-    target,
-    grpc.credentials.createInsecure()
-  )
+const serverUrl = '0.0.0.0:50051'
+const client = new virtruProto.Virtru(
+  serverUrl,
+  grpc.credentials.createInsecure()
+)
 
-  client.encrypt({ unprotectedString: 'hello world' }, function (err, response) {
+const currentTimestamp = Date.now()
+
+client.encrypt(
+  { unprotectedString: currentTimestamp },
+  function (err, response) {
     let { protectedString } = response
     console.log(protectedString)
     client.decrypt({ protectedString }, function (err, response) {
-      let { unprotectedString } = response 
+      let { unprotectedString } = response
       console.log(unprotectedString)
     })
-  })
-}
-
-main()
+  }
+)

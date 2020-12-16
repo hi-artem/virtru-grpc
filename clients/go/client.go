@@ -2,39 +2,39 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
 	"google.golang.org/grpc"
 )
 
-const	address = "0.0.0.0:50051"
+const serverUrl = "0.0.0.0:50051"
 
 func main() {
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(serverUrl, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Fatalf("Error connecting to Virtru gRPC server: %v", err)
 	}
 	defer conn.Close()
-	c := NewVirtruClient(conn)
+	client := NewVirtruClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	connContext, cancel := context.WithTimeout(context.Background(), 40*time.Second)
 	defer cancel()
 
-	encResp, err := c.Encrypt(ctx, &EncryptRequest{UnprotectedString: "Hello World"})
+	currentTimestamp := time.Now().String()
+
+	encResp, err := client.Encrypt(connContext, &EncryptRequest{UnprotectedString: currentTimestamp})
 	if err != nil {
 		log.Fatalf("Could not protect string: %v", err)
 	}
 
-	log.Printf("Protected string: %s", encResp.GetProtectedString())
+	fmt.Print(encResp.GetProtectedString(), "\n")
 
-	ctx, cancel = context.WithTimeout(context.Background(), 20*time.Second)
-	defer cancel()
-
-	decResp, err := c.Decrypt(ctx, &DecryptRequest{ProtectedString: encResp.GetProtectedString()})
+	decResp, err := client.Decrypt(connContext, &DecryptRequest{ProtectedString: encResp.GetProtectedString()})
 	if err != nil {
 		log.Fatalf("Could not decrypt protected string: %v", err)
 	}
 
-	log.Printf("Decrypted protected string: %s", decResp.GetUnprotectedString())
+	fmt.Print(decResp.GetUnprotectedString(), "\n")
 }

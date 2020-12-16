@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
+SLEEP_INTERVAL=8
+
 while :
 do
 	npm run client:js &
 	npm run client:go &
 	npm run client:ruby &
-	sleep 5
+	sleep $SLEEP_INTERVAL
 done
