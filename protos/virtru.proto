@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package virtru;
+
+service Virtru {
+  rpc Decrypt (DecryptRequest) returns (DecryptReply) {}
+  rpc Encrypt (EncryptRequest) returns (EncryptReply) {}
+}
+
+message EncryptRequest {
+  string unprotectedString = 1;
+}
+
+message EncryptReply {
+  string protectedString = 1;
+}
+
+message DecryptRequest {
+  string protectedString = 1;
+}
+
+message DecryptReply {
+  string unprotectedString = 1;
+}
